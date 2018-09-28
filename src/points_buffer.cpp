@@ -1,8 +1,6 @@
-/* road_vis.cpp
+/* points_buffer.cpp
  *
- * road:bool road[theta_dim_][grid_dim_] = 1.0;
- * not road:bool road[theta_dim_][grid_dim_] = 0.0;(e.g. gress)
- * middle road:bool road[theta_dim_][grid_dim_] = 0.5;
+ * 単なるbuffer
  *
 */
 
@@ -14,10 +12,8 @@
 #include <geometry_msgs/Point32.h>
 #include <nav_msgs/Odometry.h>
 
-
 #include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/voxel_grid.h>
-
 
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
@@ -97,9 +93,6 @@ class Buffer
 
 			return true;
 		}   
-
-
-
 };
 
 Buffer::Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh):
@@ -107,7 +100,6 @@ Buffer::Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	flag_callback(false),
 	first_flag(true)
 {
-
 	laser_sub = n.subscribe("velodyne_points", 10, &Buffer::laserCallback, this);
 	
 	buffer_pub1 = n.advertise<sensor_msgs::PointCloud2>("buffer1", 10);
@@ -121,7 +113,6 @@ Buffer::Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh):
 void
 Buffer::laserCallback(const sensor_msgs::PointCloud2 input){
 
-	// buffer_points[0]  = input;
 	new_buffer_points  = input;
 
 	flag_callback = true;
@@ -130,20 +121,17 @@ Buffer::laserCallback(const sensor_msgs::PointCloud2 input){
 void
 Buffer::buffer2point(){
 
-
 	if(!first_flag){
 		for(int i=N-1;i>0;i--){
 			buffer_points[i] = buffer_points[i-1];
 		}
 	}
 
-
 	pcl::fromROSMsg(new_buffer_points,*input_cloud);
 	
 	voxel_grid(0.3,input_cloud,filtered_vg_cloud);
 	
 	pcl::toROSMsg(*filtered_vg_cloud,buffer_points[0]);
-
 
 	if(first_flag){
 		for(int i=0;i<N;i++){
@@ -185,6 +173,7 @@ Buffer::change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub
 	}
 
 	point_pub(pub_,*change_output,"/velodyne",ros::Time::now());
+
 }
 
 
