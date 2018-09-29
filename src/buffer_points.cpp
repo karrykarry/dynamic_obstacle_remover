@@ -1,4 +1,4 @@
-/* points_buffer.cpp
+/* buffer_points.cpp
  *
  * 単なるbuffer
  *
@@ -62,16 +62,18 @@ class Buffer
 
 		bool flag_callback;
 		bool first_flag;
+		size_t point_size;
+
+		ros::Time time_v;
 
 		//param
-		size_t point_size;
-		// ros::Time time_v;
+		float voxel_size;	
 	public:
 
 		Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh);
 		void laserCallback(const sensor_msgs::PointCloud2 input);
 		void buffer2point();
-		void change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub);
+		void change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub,string frame);
 
 		bool spin()
 		{
@@ -80,11 +82,22 @@ class Buffer
 			while(ros::ok()){
 				if(flag_callback){
 					buffer2point();
-					change_point(buffer_points[0],buffer_pub1);             
-					change_point(buffer_points[1],buffer_pub2);             
-					change_point(buffer_points[2],buffer_pub3);             
-					change_point(buffer_points[3],buffer_pub4);             
-					change_point(buffer_points[4],buffer_pub5);             
+					// change_point(buffer_points[0],buffer_pub1);             
+					// change_point(buffer_points[1],buffer_pub2);             
+					// change_point(buffer_points[0],buffer_pub1,"/save_velodyne");             
+					// change_point(buffer_points[0],buffer_pub2,"/velodyne");             
+					// change_point(buffer_points[4],buffer_pub3,"/save_velodyne");             
+					// change_point(buffer_points[4],buffer_pub4,"/velodyne");             
+
+					// change_point(buffer_points[0],buffer_pub1,"/odom");             
+					// change_point(buffer_points[0],buffer_pub2,"/velodyne");             
+					// change_point(buffer_points[4],buffer_pub3,"/odom");             
+					// change_point(buffer_points[4],buffer_pub4,"/velodyne");             
+					
+					change_point(buffer_points[0],buffer_pub5,"/velodyne");             
+					
+					// change_point(buffer_points[3],buffer_pub4);             
+					// change_point(buffer_points[4],buffer_pub5);             
 				}
 
 				ros::spinOnce();
@@ -96,17 +109,23 @@ class Buffer
 };
 
 Buffer::Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh):
-	r(1),
+	r(20),
 	flag_callback(false),
 	first_flag(true)
 {
 	laser_sub = n.subscribe("velodyne_points", 10, &Buffer::laserCallback, this);
 	
-	buffer_pub1 = n.advertise<sensor_msgs::PointCloud2>("buffer1", 10);
-	buffer_pub2 = n.advertise<sensor_msgs::PointCloud2>("buffer2", 10);
-	buffer_pub3 = n.advertise<sensor_msgs::PointCloud2>("buffer3", 10);
-	buffer_pub4 = n.advertise<sensor_msgs::PointCloud2>("buffer4", 10);
+	// buffer_pub1 = n.advertise<sensor_msgs::PointCloud2>("buffer1", 10);
+	// buffer_pub2 = n.advertise<sensor_msgs::PointCloud2>("buffer2", 10);
+	// buffer_pub3 = n.advertise<sensor_msgs::PointCloud2>("buffer3", 10);
+	// buffer_pub4 = n.advertise<sensor_msgs::PointCloud2>("buffer4", 10);
+	// buffer_pub1 = n.advertise<sensor_msgs::PointCloud2>("save_velodyne_1", 10);
+	// buffer_pub2 = n.advertise<sensor_msgs::PointCloud2>("velodyne_1", 10);
+	// buffer_pub3 = n.advertise<sensor_msgs::PointCloud2>("save_velodyne_4", 10);
+	// buffer_pub4 = n.advertise<sensor_msgs::PointCloud2>("velodyne_4", 10);
 	buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("buffer5", 10);
+
+	priv_nh.getParam("voxel_size", voxel_size);
 }
 
 
@@ -114,7 +133,6 @@ void
 Buffer::laserCallback(const sensor_msgs::PointCloud2 input){
 
 	new_buffer_points  = input;
-
 	flag_callback = true;
 }
 
@@ -127,10 +145,9 @@ Buffer::buffer2point(){
 		}
 	}
 
+	time_v = new_buffer_points.header.stamp;
 	pcl::fromROSMsg(new_buffer_points,*input_cloud);
-	
-	voxel_grid(0.3,input_cloud,filtered_vg_cloud);
-	
+	voxel_grid(voxel_size,input_cloud,filtered_vg_cloud);
 	pcl::toROSMsg(*filtered_vg_cloud,buffer_points[0]);
 
 	if(first_flag){
@@ -144,13 +161,12 @@ Buffer::buffer2point(){
 }
 
 void
-Buffer::change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub_){
+Buffer::change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub_,string frame){
 
 	pcl::PointCloud<pcl::PointXYZI>::Ptr change_input (new pcl::PointCloud<pcl::PointXYZI>);
 	pcl::PointCloud<pcl::PointXYZI>::Ptr change_output (new pcl::PointCloud<pcl::PointXYZI>);
 
 	pcl::fromROSMsg(vg_buffer_point,*change_input);
-	// time_v = buffer_points[0].header.stamp;
 
 	point_size = change_input->points.size();
 
@@ -172,18 +188,22 @@ Buffer::change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub
 		}
 	}
 
-	point_pub(pub_,*change_output,"/velodyne",ros::Time::now());
-
+	point_pub(pub_,*change_output,frame,time_v);
+	
+	// point_pub(pub_,*change_output,"/save_velodyne",ros::Time::now());
+	// point_pub(pub_,*change_output,"/save_velodyne",vg_buffer_point.header.stamp);
+	// point_pub(pub_,*change_output,frame,vg_buffer_point.header.stamp);
+	// cout<<vg_buffer_point.header.stamp<<endl;
 }
 
 
 
 int main(int argc, char** argv){
-	ros::init(argc, argv, "points_buffer");
+	ros::init(argc, argv, "buffer_points");
 	ros::NodeHandle n;
 	ros::NodeHandle priv_nh("~");
 
-	cout<<"-------points buffer ok--------"<<endl;
+	cout<<"-------buffer points ok--------"<<endl;
 
 	Buffer buffer(n,priv_nh);
 	

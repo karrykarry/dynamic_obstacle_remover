@@ -150,8 +150,34 @@ add_library(dynamic_obstacle_remover
 SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
 
-add_executable(points_buffer src/points_buffer.cpp)
-target_link_libraries(points_buffer
+add_executable(buffer_points src/buffer_points.cpp)
+add_executable(voxel_points src/voxel_points.cpp)
+add_executable(buffer_tf_convert src/buffer_tf_convert.cpp)
+add_executable(save_points_pub src/save_points_pub.cpp)
+
+target_link_libraries(buffer_points
+	dynamic_obstacle_remover
+	${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
+
+target_link_libraries(buffer_tf_convert
+	dynamic_obstacle_remover
+	${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
+
+
+
+
+target_link_libraries(voxel_points
+	dynamic_obstacle_remover
+	${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
+
+
+target_link_libraries(save_points_pub
 	dynamic_obstacle_remover
 	${catkin_LIBRARIES}
     ${PCL_LIBRARIES}

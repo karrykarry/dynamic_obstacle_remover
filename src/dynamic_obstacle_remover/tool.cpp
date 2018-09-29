@@ -36,16 +36,3 @@ void point_pub(ros::Publisher pub,const pcl::PointCloud<pcl::PointXYZI>& cloud, 
     pub.publish(pub_points);
 }
 
-
-
-//
-// inline void pubPointCloud2(ros::Publisher& pub, 
-//                             const CloudA& cloud,
-//                             const char* frame_id,
-//                             ros::Time& time)
-// {
-//     sensor_msgs::PointCloud2 output;
-//     pcl::toROSMsg(cloud, output);
-//     output.header.frame_id ="velodyne";
-//     output.header.stamp = time;
-// }

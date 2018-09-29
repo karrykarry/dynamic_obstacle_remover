@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <launch>
 	
-	<node name="points_buffer" pkg="dynamic_obstacle_remover" type="points_buffer" output="screen" >
+	<node name="buffer_points" pkg="dynamic_obstacle_remover" type="buffer_points" output="screen" >
+	<!-- <node name="voxel_points" pkg="dynamic_obstacle_remover" type="voxel_points" output="screen" > -->
 		
+		<param name="voxel_size" value="0.1" />
 	</node>
-
   <node pkg="tf" type="static_transform_publisher" name="velodyne2buffer"
-	  args="0 0 1.0 0 0 0 /velodyne /buffer 100" />
-
+	  args="0 0 0.0 0 0 0 /velodyne /buffer 100" />
 
 </launch>

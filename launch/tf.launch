@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+	
+	<node name="save_points_pub" pkg="dynamic_obstacle_remover" type="save_points_pub" output="screen" >		
+		<param name="Parent_id" value="/velodyne" />
+		<param name="Child_id" value="/odom" />
+	</node>
+
+</launch>
+
