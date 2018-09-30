@@ -94,7 +94,7 @@ Buffer::laserCallback(const sensor_msgs::PointCloud2 input){
 		
 		float d = distance(filtered_vg_cloud->points[i].x,filtered_vg_cloud->points[i].y);
 		
-		if(d<20){
+		if(d<18){
 
 			pcl::PointXYZI temp_point;
 			temp_point.x = filtered_vg_cloud->points[i].x; 
