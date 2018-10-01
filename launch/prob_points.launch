@@ -2,14 +2,14 @@
 <launch>
 	
 	<node name="save_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" output="screen" >		
-	<!-- <node name="save_points_pub" pkg="dynamic_obstacle_remover" type="save_points_pub" output="screen" >		 -->
-		<!-- <param name="Parent_id" value="/odom" /> -->
-		<!-- <param name="Child_id" value="/velodyne" /> -->
+		
 		<param name="Parent_id" value="/velodyne" />
 		<param name="Child_id" value="/odom" />
 		<param name="skip_time" value="5" />
 		<param name="step_num" value="10" />
+		<param name="distance_threshold" value="20" />
 	</node>
 
 </launch>
+
 
