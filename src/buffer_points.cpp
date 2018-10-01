@@ -126,7 +126,8 @@ Buffer::Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	// buffer_pub2 = n.advertise<sensor_msgs::PointCloud2>("velodyne_1", 10);
 	// buffer_pub3 = n.advertise<sensor_msgs::PointCloud2>("save_velodyne_4", 10);
 	// buffer_pub4 = n.advertise<sensor_msgs::PointCloud2>("velodyne_4", 10);
-	buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("buffer5", 10);
+	// buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("buffer5", 10);
+	buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("voxel_points", 10);
 
 	priv_nh.getParam("voxel_size", voxel_size);
 	priv_nh.getParam("frame_name", frame_name);

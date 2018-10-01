@@ -50,17 +50,16 @@ class BufferTF
 		tf::StampedTransform buffer_transform;
 	
 		sensor_msgs::PointCloud buffer_point;
-		sensor_msgs::PointCloud save_point;
+		vector<sensor_msgs::PointCloud> save_point;
 		vector<sensor_msgs::PointCloud2> save_point2;
-		vector<sensor_msgs::PointCloud2> swap_save_point2;	//保存用
-		sensor_msgs::PointCloud2 pub_points;
+		sensor_msgs::PointCloud pub_point;
 		ros::Time time_now;
 		
 		int count;
-		bool flag;
+		int count_s;
 		//param
-		int skip_time;
-		int step_num;
+		int skip;
+		int STEP;
 		string Parent_id;
 		string Child_id;
 	
@@ -70,57 +69,61 @@ class BufferTF
 		void listen_tf();
 		void save_points2pcl();
 		void buffer2velo();
+
+
 };
 
 BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
-	r(20),	
-	flag(true)
+	r(20)	
 {
 	laser_sub = n.subscribe("buffer5", 10, &BufferTF::laserCallback, this);
-	// laser_sub = n.subscribe("velodyne_points", 10, &BufferTF::laserCallback, this);
 	
 	save_pub = n.advertise<sensor_msgs::PointCloud2>("save_point", 10);
 	
 	priv_nh.getParam("Parent_id", Parent_id);
 	priv_nh.getParam("Child_id", Child_id);
-	priv_nh.getParam("skip_time", skip_time);
-	priv_nh.getParam("step_num", step_num);
+	priv_nh.getParam("skip_num", skip);
+	priv_nh.getParam("step_num", STEP);
 	
-	save_point2 = vector<sensor_msgs::PointCloud2> (step_num);
-	swap_save_point2 = vector<sensor_msgs::PointCloud2> (step_num);
+	save_point = vector<sensor_msgs::PointCloud> (STEP);
+	save_point2 = vector<sensor_msgs::PointCloud2> (STEP);
 
-	count =  0;
+	count = count_s = 0;
 }
 
 void
 BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 
-	if(count%skip_time==0){
-
+	if(count%skip==0){
+		count_s++;
 		sensor_msgs::convertPointCloud2ToPointCloud(input, buffer_point);
-		listen_tf();//tfつかっていれている
-	
-		if(flag){
-			for(int i=1;i<step_num;i++){
-				save_point2[i]=save_point2[0];
-			}
-			flag = false;
+		listen_tf();
+		save_points2pcl();
+		if(count_s%3==0){
+			pcl::toROSMsg(*save_cloud,save_point2[0]);
+			save_point2[0].header.frame_id = "/odom"; //odomとかに変更
+			save_point2[0].header.stamp = time_now;
+			save_pub.publish(save_point2[0]);
+            
+			save_cloud->points.clear();
+			count=count_s=0;
+
+
+
+
+
+			// pcl::toROSMsg(*save_cloud,velo_point2);
+			// sensor_msgs::convertPointCloud2ToPointCloud(velo_point2, buffer_point);
+			// buffer2velo();
+            //
+			// save_cloud->points.clear();
+			// count=count_s=0;
 		}
-		
-		save_points2pcl();//main処理
 
-		//pub
-		pcl::toROSMsg(*save_cloud,pub_points);
-		pub_points.header.frame_id = "/odom"; //odomとかに変更
-		pub_points.header.stamp = time_now;
-		save_pub.publish(pub_points);
-
-		save_cloud->points.clear();
-
-		count=0;
 	}
 
 	count++;
+
 }
 
 void
@@ -134,10 +137,10 @@ BufferTF::listen_tf(){
 				Child_id,time_now, 
 				Parent_id,past,
 				"/map",ros::Duration(3.0));
-		listener.lookupTransform(Child_id, Parent_id,  
-				time_now, buffer_transform);
-		listener.transformPointCloud(Child_id, time_now, buffer_point, Parent_id, save_point);
-		sensor_msgs::convertPointCloudToPointCloud2(save_point, save_point2[0]);
+
+		listener.transformPointCloud(Child_id, time_now, buffer_point, Parent_id, save_point[0]);
+		sensor_msgs::convertPointCloudToPointCloud2(save_point[0], save_point2[0]);
+		pcl::fromROSMsg(save_point2[0], *input_cloud);   
 	}
 	catch (tf::TransformException ex){
 		ROS_ERROR("%s",ex.what());
@@ -148,33 +151,20 @@ BufferTF::listen_tf(){
 
 void
 BufferTF::save_points2pcl(){
+	
+	size_t point_size = input_cloud->points.size();
 
-	for(int i=0;i<step_num;i++){
+	for(size_t i = 0; i < point_size; i++){
+		
+			pcl::PointXYZI temp_point;
+			temp_point.x = input_cloud->points[i].x; 
+			temp_point.y = input_cloud->points[i].y;
+			temp_point.z = input_cloud->points[i].z;
+			temp_point.intensity = input_cloud->points[i].intensity;
 
-		pcl::fromROSMsg(save_point2[i], *input_cloud);   
-		size_t point_size = input_cloud->points.size();
-
-		for(size_t i = 0; i < point_size; i++){
-
-			float d = distance(input_cloud->points[i].x-buffer_transform.getOrigin().x(),
-					input_cloud->points[i].y-buffer_transform.getOrigin().y());
-
-			if(d<20){
-
-				pcl::PointXYZI temp_point;
-				temp_point.x = input_cloud->points[i].x; 
-				temp_point.y = input_cloud->points[i].y;
-				temp_point.z = input_cloud->points[i].z;
-				temp_point.intensity = input_cloud->points[i].intensity;
-
-				save_cloud->points.push_back(temp_point);
-			}
-		}
-
-		if(!(i==step_num-1)) swap_save_point2[i+1] = save_point2[i];
+			save_cloud->points.push_back(temp_point);
 	}
 
-	save_point2 = swap_save_point2;
 }
 
 
@@ -222,5 +212,6 @@ int main(int argc, char **argv){
 
 	return 0;
 }
+
 
 
