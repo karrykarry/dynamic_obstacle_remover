@@ -95,6 +95,7 @@ class Buffer
 					// change_point(buffer_points[4],buffer_pub4,"/velodyne");             
 					
 					change_point(buffer_points[0],buffer_pub5,"/velodyne");             
+					// change_point(buffer_points[0],buffer_pub5,"/odom");             
 					
 					// change_point(buffer_points[3],buffer_pub4);             
 					// change_point(buffer_points[4],buffer_pub5);             

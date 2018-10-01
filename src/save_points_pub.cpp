@@ -94,20 +94,17 @@ BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 		save_point();
 		if(count_s%3==0){
 			pcl::toROSMsg(*save_cloud,velo_point2);
-			// velo_point2.header.frame_id = "/buffer";
-			velo_point2.header.frame_id = "/velodyne";
+			velo_point2.header.frame_id = "/velodyne"; //odomとかに変更
 			velo_point2.header.stamp = time_now;
 			save_pub.publish(velo_point2);
-
+            
 			save_cloud->points.clear();
 			count=count_s=0;
 
 			// pcl::toROSMsg(*save_cloud,velo_point2);
-			// // sensor_msgs::convertPointCloud2ToPointCloud(velo_point2, buffer_point);
-			// // buffer2velo();
-			// velo_point2.header.frame_id = "/velodyne";
-			// velo_point2.header.stamp = time_now;
-			// save_pub.publish(velo_point2);
+			// sensor_msgs::convertPointCloud2ToPointCloud(velo_point2, buffer_point);
+			// velo_point2.header.frame_id = "/odom";
+			// buffer2velo();
             //
 			// save_cloud->points.clear();
 			// count=count_s=0;
@@ -165,8 +162,16 @@ void
 BufferTF::buffer2velo(){
 
 	try{
+		// ros::Time time_now = buffer_point.header.stamp;
+		ros::Time past = time_now - ros::Duration(5.0);
 
-		listener.transformPointCloud(Parent_id, time_now, buffer_point, Child_id, velo_point);
+		listener.waitForTransform(
+				Child_id,time_now, 
+				Parent_id,past,
+				"/map",ros::Duration(3.0));
+
+		listener.transformPointCloud(Child_id, time_now, buffer_point, Parent_id, velo_point);
+		// listener.transformPointCloud(Parent_id, time_now, buffer_point, Child_id, velo_point);
 		sensor_msgs::convertPointCloudToPointCloud2(velo_point, velo_point2);
 		velo_point2.header.frame_id = "/velodyne";
 		velo_point2.header.stamp = time_now;
