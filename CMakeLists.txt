@@ -144,6 +144,7 @@ add_definitions(
 add_library(dynamic_obstacle_remover
   
 	src/dynamic_obstacle_remover/tool.cpp
+	src/dynamic_obstacle_remover/save_points.cpp
 )
 
 
@@ -154,6 +155,7 @@ add_executable(buffer_points src/buffer_points.cpp)
 add_executable(voxel_points src/voxel_points.cpp)
 add_executable(buffer_tf_convert src/buffer_tf_convert.cpp)
 add_executable(save_points_pub src/save_points_pub.cpp)
+add_executable(probability_points src/probability_points.cpp)
 
 target_link_libraries(buffer_points
 	dynamic_obstacle_remover
@@ -169,7 +171,6 @@ target_link_libraries(buffer_tf_convert
 
 
 
-
 target_link_libraries(voxel_points
 	dynamic_obstacle_remover
 	${catkin_LIBRARIES}
@@ -182,6 +183,13 @@ target_link_libraries(save_points_pub
 	${catkin_LIBRARIES}
     ${PCL_LIBRARIES}
 )
+
+target_link_libraries(probability_points
+	dynamic_obstacle_remover
+	${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
+
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
