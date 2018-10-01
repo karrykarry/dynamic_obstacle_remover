@@ -68,6 +68,7 @@ class Buffer
 
 		//param
 		float voxel_size;	
+		string frame_name;	
 	public:
 
 		Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh);
@@ -94,7 +95,8 @@ class Buffer
 					// change_point(buffer_points[4],buffer_pub3,"/odom");             
 					// change_point(buffer_points[4],buffer_pub4,"/velodyne");             
 					
-					change_point(buffer_points[0],buffer_pub5,"/velodyne");             
+					// change_point(buffer_points[0],buffer_pub5,"/velodyne");             
+					change_point(buffer_points[0],buffer_pub5,frame_name);             
 					// change_point(buffer_points[0],buffer_pub5,"/odom");             
 					
 					// change_point(buffer_points[3],buffer_pub4);             
@@ -127,6 +129,7 @@ Buffer::Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("buffer5", 10);
 
 	priv_nh.getParam("voxel_size", voxel_size);
+	priv_nh.getParam("frame_name", frame_name);
 }
 
 
