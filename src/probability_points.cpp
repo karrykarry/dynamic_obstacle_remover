@@ -95,9 +95,9 @@ BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 		save_points.save_points2pcl(step_num,dynamic_cloud,static_cloud,clear_cloud);//main処理
 
 		//pub
-		point_pub(dynamic_pub,*dynamic_cloud,"/odom",time_now);
-		point_pub(static_pub,*static_cloud,"/odom",time_now);
-		point_pub(clear_pub,*clear_cloud,"/odom",time_now);
+		point_pub(dynamic_pub,*dynamic_cloud,"/velodyne",time_now);
+		point_pub(static_pub,*static_cloud,"/velodyne",time_now);
+		point_pub(clear_pub,*clear_cloud,"/velodyne",time_now);
 
 		save_points.points_clear(dynamic_cloud);
 		save_points.points_clear(static_cloud);

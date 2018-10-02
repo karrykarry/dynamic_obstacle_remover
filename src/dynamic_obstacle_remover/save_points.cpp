@@ -126,9 +126,9 @@ Save_points::minmax_method(
 				if(min[x][y]+0.1>input_cloud->points[i].z) {//////////12/09変更
 					
 					pcl::PointXYZI temp_point;
-					temp_point.x = input_cloud->points[i].x; 
-					temp_point.y = input_cloud->points[i].y;
-					temp_point.z = input_cloud->points[i].z;
+					temp_point.x = input_cloud->points[i].x-buffer_transform.getOrigin().x(); 
+					temp_point.y = input_cloud->points[i].y-buffer_transform.getOrigin().y();
+					temp_point.z = input_cloud->points[i].z-buffer_transform.getOrigin().z();
 					temp_point.intensity = input_cloud->points[i].intensity;
 
 					clear_cloud->points.push_back(temp_point);
@@ -161,9 +161,9 @@ Save_points::dynamic_or_static(int step_num,
 				
 				
 				pcl::PointXYZI temp_point;
-				temp_point.x = obstacle_cloud->points[i].x; 
-				temp_point.y = obstacle_cloud->points[i].y;
-				temp_point.z = obstacle_cloud->points[i].z;
+				temp_point.x = obstacle_cloud->points[i].x-buffer_transform.getOrigin().x(); 
+				temp_point.y = obstacle_cloud->points[i].y-buffer_transform.getOrigin().y();
+				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
 				static_cloud->points.push_back(temp_point);
@@ -171,9 +171,9 @@ Save_points::dynamic_or_static(int step_num,
 	
 		else{
 				pcl::PointXYZI temp_point;
-				temp_point.x = obstacle_cloud->points[i].x; 
-				temp_point.y = obstacle_cloud->points[i].y;
-				temp_point.z = obstacle_cloud->points[i].z;
+				temp_point.x = obstacle_cloud->points[i].x-buffer_transform.getOrigin().x(); 
+				temp_point.y = obstacle_cloud->points[i].y-buffer_transform.getOrigin().y();
+				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
 				dynamic_cloud->points.push_back(temp_point);
