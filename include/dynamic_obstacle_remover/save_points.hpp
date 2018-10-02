@@ -19,8 +19,7 @@
 
 using namespace std;
 
-
-pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZI>);
+const float height_diff_threshold_ = 0.15;
 
 class Save_points
 {
@@ -32,19 +31,28 @@ class Save_points
 
 		sensor_msgs::PointCloud save_point;
 
-		vector<sensor_msgs::PointCloud2> save_point2;
-		vector<sensor_msgs::PointCloud2> swap_save_point2;	//保存用
-	
-		int distance_threshold;	
-		
+		vector<sensor_msgs::PointCloud2> save_point2;		//保存用
+		vector<sensor_msgs::PointCloud2> swap_save_point2;	//次の保存用のswap
+
+		vector< vector<float> > prob;	//gridの確率
+
+		int step_num;
+		int grid_dim_;
+		float m_per_cell_;
+		float static_threshold;
+
 	public:
 
 	Save_points();
-	void prepare(int step_num,int threshold);
+	void prepare(int step_num,int grid_dim,float per_celli,float s_threshold);
 	bool first_process(int step_num);
 	void listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, string Parent_id);
+	
+	void minmax_method(sensor_msgs::PointCloud2 s_points, pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud);//height_map
 
-	void save_points2pcl(int step_num,pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud);
+	void dynamic_or_static(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud);//
+	
+	void save_points2pcl(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud);
 
 	void points_clear(pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud);
 

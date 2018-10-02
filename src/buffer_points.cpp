@@ -179,9 +179,9 @@ Buffer::change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub
 
 	for(size_t i = 0; i < point_size; i++){
 		
-		float d = distance(change_input->points[i].x,change_input->points[i].y);
-		
-		if(d<20){
+		// float d = distance(change_input->points[i].x,change_input->points[i].y);
+		//
+		// if(d<20){
 
 			pcl::PointXYZI temp_point;
 			temp_point.x = change_input->points[i].x; 
@@ -190,7 +190,7 @@ Buffer::change_point(sensor_msgs::PointCloud2 vg_buffer_point,ros::Publisher pub
 			temp_point.intensity = change_input->points[i].intensity;
 
 			change_output->points.push_back(temp_point);
-		}
+		// }
 	}
 
 	point_pub(pub_,*change_output,frame,time_v);

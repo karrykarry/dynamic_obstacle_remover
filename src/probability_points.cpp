@@ -1,7 +1,9 @@
-/* 
+/* probability_points.cpp:動的の点・静的の点・地面を抽出
+ *
+ * skip_time 分の[hz]で貯めて，step分の点群を貯める
+ * 障害物判定にgrid_dim_でグリッドの大きさ・per_cellで解像度を表している．
  *
 */ 
-
 #include <ros/ros.h>
 #include <iostream>
 #include <nav_msgs/Odometry.h>
@@ -22,27 +24,35 @@
 
 using namespace std;
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud (new pcl::PointCloud<pcl::PointXYZI>);
+pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud (new pcl::PointCloud<pcl::PointXYZI>);
+pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud (new pcl::PointCloud<pcl::PointXYZI>);
+pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud (new pcl::PointCloud<pcl::PointXYZI>);
 
 class BufferTF
 {
 	private:
 		ros::Rate r;
 		ros::Subscriber laser_sub;
-		ros::Publisher save_pub;
+		ros::Publisher dynamic_pub;
+		ros::Publisher static_pub;
+		ros::Publisher clear_pub;
 	
 		sensor_msgs::PointCloud buffer_point;
-		sensor_msgs::PointCloud2 pub_points;
+		sensor_msgs::PointCloud2 clear_points;
+		sensor_msgs::PointCloud2 dynamic_points;
+		sensor_msgs::PointCloud2 static_points;
 		ros::Time time_now;
 			
 		int count;
 		bool flag;
 		//param
-		int skip_time;
-		int step_num;
-		int threshold;
 		string Parent_id;
 		string Child_id;
+		int skip_time;
+		int step_num;
+		int grid_dim;
+		float per_cell;
+		float static_threshold;
 	
 	public:
 		BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh);
@@ -57,15 +67,19 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 {
 	laser_sub = n.subscribe("voxel_points", 10, &BufferTF::laserCallback, this);
 	
-	save_pub = n.advertise<sensor_msgs::PointCloud2>("save_points_pub", 10);
+	dynamic_pub = n.advertise<sensor_msgs::PointCloud2>("dynamic_points_pub", 10);
+	static_pub = n.advertise<sensor_msgs::PointCloud2>("static_points_pub", 10);
+	clear_pub = n.advertise<sensor_msgs::PointCloud2>("clear_points_pub", 10);
 	
 	priv_nh.getParam("Parent_id", Parent_id);
 	priv_nh.getParam("Child_id", Child_id);
 	priv_nh.getParam("skip_time", skip_time);
 	priv_nh.getParam("step_num", step_num);
-	priv_nh.getParam("distance_threshold", threshold);
+	priv_nh.getParam("grid_dim_", grid_dim);
+	priv_nh.getParam("per_cell_", per_cell);
+	priv_nh.getParam("static_threshold", static_threshold);
 
-	save_points.prepare(step_num,threshold);
+	save_points.prepare(step_num,grid_dim,per_cell,static_threshold);
 }
 
 void
@@ -75,18 +89,19 @@ BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 
 		sensor_msgs::convertPointCloud2ToPointCloud(input, buffer_point);
 		ros::Time time_now = buffer_point.header.stamp;
-		save_points.listen_tf(buffer_point, Child_id, Parent_id);//tfつかっていれている
+		save_points.listen_tf(buffer_point, Child_id, Parent_id);
 	
-		if(flag) flag = save_points.first_process(step_num);
-		save_points.save_points2pcl(step_num,save_cloud);//main処理
+		if(flag) flag = save_points.first_process(step_num);//はじめの処理
+		save_points.save_points2pcl(step_num,dynamic_cloud,static_cloud,clear_cloud);//main処理
 
 		//pub
-		pcl::toROSMsg(*save_cloud,pub_points);
-		pub_points.header.frame_id = "/odom"; //odomとかに変更
-		pub_points.header.stamp = time_now;
-		save_pub.publish(pub_points);
+		point_pub(dynamic_pub,*dynamic_cloud,"/odom",time_now);
+		point_pub(static_pub,*static_cloud,"/odom",time_now);
+		point_pub(clear_pub,*clear_cloud,"/odom",time_now);
 
-		save_points.points_clear(save_cloud) ;
+		save_points.points_clear(dynamic_cloud);
+		save_points.points_clear(static_cloud);
+		save_points.points_clear(clear_cloud);
 
 		count=0;
 	}
