@@ -11,6 +11,21 @@ float distance(float x,float y){
 }
 
 
+// void return_globalxy(double x, double y, double yaw, double& return_x, double& return_y){
+// 	
+// 	Eigen::Rotation2Dd rot(yaw*(-1));
+// 	Eigen::Vector2d input_xy;
+// 	Eigen::Vector2d ans;
+//
+// 	input_xy << x, y;
+//
+// 	ans = rot*input_xy;
+//
+// 	return_x = ans.x();
+// 	return_y = ans.y();
+// }
+
+
 
 void voxel_grid(float size,pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,pcl::PointCloud<pcl::PointXYZI>::Ptr &filtered_cloud){
 

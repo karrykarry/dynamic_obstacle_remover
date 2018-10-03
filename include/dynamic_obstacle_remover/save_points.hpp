@@ -2,9 +2,9 @@
 #define _SAVE_POINTS_HPP_
 
 #include <ros/ros.h>
-#include<iostream>
-#include<vector>
-#include<string.h>
+#include <iostream>
+#include <vector>
+#include <string.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
@@ -14,6 +14,10 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <Eigen/Eigenvalues>
+
 
 #include"tool.hpp"
 
@@ -44,8 +48,14 @@ class Save_points
 	public:
 
 	Save_points();
+
+	void say();
+
 	void prepare(int step_num,int grid_dim,float per_celli,float s_threshold);
 	bool first_process(int step_num);
+
+	void return_globalxy(double x, double y, double yaw, double& return_x, double& return_y);
+	
 	void listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, string Parent_id);
 	
 	void minmax_method(sensor_msgs::PointCloud2 s_points, pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud);//height_map
@@ -54,7 +64,6 @@ class Save_points
 	
 	void save_points2pcl(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud);
 
-	void points_clear(pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud);
 
 };
 

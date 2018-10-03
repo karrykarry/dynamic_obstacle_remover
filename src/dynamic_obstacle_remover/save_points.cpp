@@ -20,7 +20,7 @@ Save_points::prepare(int step_n,int grid_dim,float per_cell,float s_threshold){
 
 	save_point2 = vector<sensor_msgs::PointCloud2> (step_n);
 	swap_save_point2 = vector<sensor_msgs::PointCloud2> (step_n);
-	prob = vector< vector<float> >(grid_dim_, vector<float>(grid_dim_,0));
+	prob = vector< vector<float> >(grid_dim_+1, vector<float>(grid_dim_+1,0));
 }
 
 //はじめの点群を入れ込む
@@ -55,6 +55,24 @@ Save_points::listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, st
 	}
 }
 
+
+void 
+Save_points::return_globalxy(double x, double y, double yaw, double& return_x, double& return_y){
+	
+	Eigen::Rotation2Dd rot(yaw*(-1));
+	Eigen::Vector2d input_xy;
+	Eigen::Vector2d ans;
+
+	input_xy << x, y;
+
+	ans = rot*input_xy;
+
+	return_x = ans.x();
+	return_y = ans.y();
+}
+
+
+
 void
 Save_points::minmax_method(
 		sensor_msgs::PointCloud2 s_points, 
@@ -62,15 +80,17 @@ Save_points::minmax_method(
 		pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud)
 {
 
-	float min[grid_dim_][grid_dim_];
-	float max[grid_dim_][grid_dim_];
-	bool init[grid_dim_][grid_dim_];
-	bool prob_flag[grid_dim_][grid_dim_]; //1回のminmax-methodで1回だけカウントするため
+	float min[grid_dim_+1][grid_dim_+1];
+	float max[grid_dim_+1][grid_dim_+1];
+	bool init[grid_dim_+1][grid_dim_+1];
+	bool prob_flag[grid_dim_+1][grid_dim_+1]; //1回のminmax-methodで1回だけカウントするため
 	//初期化
-	fill(min[0],min[grid_dim_],0);
-	fill(max[0],max[grid_dim_],0);
-	fill(init[0],init[grid_dim_],0);
-	fill(prob_flag[0],prob_flag[grid_dim_],0);
+	fill(min[0],min[grid_dim_+1],0);
+	fill(max[0],max[grid_dim_+1],0);
+	fill(init[0],init[grid_dim_+1],0);
+	fill(prob_flag[0],prob_flag[grid_dim_+1],0);
+	
+	double t_x=0,t_y=0,t_yaw=0,r_x=0,r_y=0;
 
 	pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZI>);
 
@@ -78,11 +98,13 @@ Save_points::minmax_method(
 	size_t point_size = input_cloud->points.size();
 	// build height map
 	for (size_t i = 0; i < point_size; ++i) {
-		int x = ((grid_dim_/2)+
-				(input_cloud->points[i].x-buffer_transform.getOrigin().x())/m_per_cell_);
-		
-		int y = ((grid_dim_/2)+
-				(input_cloud->points[i].y-buffer_transform.getOrigin().y())/m_per_cell_);
+		t_x = input_cloud->points[i].x-buffer_transform.getOrigin().x();
+		t_y = input_cloud->points[i].y-buffer_transform.getOrigin().y();
+		t_yaw = tf::getYaw(buffer_transform.getRotation());
+		return_globalxy(t_x,t_y,t_yaw,r_x,r_y);
+
+		int x = ((grid_dim_/2)+(r_x)/m_per_cell_);
+		int y = ((grid_dim_/2)+(r_y)/m_per_cell_);	
 
 		if (x >= 0 && x < grid_dim_ && y >= 0 && y < grid_dim_) {
 			if (!init[x][y]) {
@@ -99,11 +121,14 @@ Save_points::minmax_method(
 
 	// display points where map has height-difference > threshold
 	for (size_t i = 0; i < point_size; ++i) {
-		int x = ((grid_dim_/2)+
-				(input_cloud->points[i].x-buffer_transform.getOrigin().x())/m_per_cell_);
+		t_x = input_cloud->points[i].x-buffer_transform.getOrigin().x();
+		t_y = input_cloud->points[i].y-buffer_transform.getOrigin().y();
+		t_yaw = tf::getYaw(buffer_transform.getRotation());
 		
-		int y = ((grid_dim_/2)+
-				(input_cloud->points[i].y-buffer_transform.getOrigin().y())/m_per_cell_);
+		return_globalxy(t_x,t_y,t_yaw,r_x,r_y);
+		int x = ((grid_dim_/2)+(r_x)/m_per_cell_);
+		
+		int y = ((grid_dim_/2)+(r_y)/m_per_cell_);
 
 		if (x >= 0 && x < grid_dim_ && y >= 0 && y < grid_dim_ && init[x][y]) {//gridの中に
 
@@ -113,8 +138,8 @@ Save_points::minmax_method(
 				prob_flag[x][y] = true;
 				
 				pcl::PointXYZI temp_point;
-				temp_point.x = input_cloud->points[i].x; 
-				temp_point.y = input_cloud->points[i].y;
+				temp_point.x = r_x; 
+				temp_point.y = r_y;	
 				temp_point.z = input_cloud->points[i].z;
 				temp_point.intensity = input_cloud->points[i].intensity;
 
@@ -126,8 +151,8 @@ Save_points::minmax_method(
 				if(min[x][y]+0.1>input_cloud->points[i].z) {//////////12/09変更
 					
 					pcl::PointXYZI temp_point;
-					temp_point.x = input_cloud->points[i].x-buffer_transform.getOrigin().x(); 
-					temp_point.y = input_cloud->points[i].y-buffer_transform.getOrigin().y();
+					temp_point.x = r_x; 
+					temp_point.y = r_y;
 					temp_point.z = input_cloud->points[i].z-buffer_transform.getOrigin().z();
 					temp_point.intensity = input_cloud->points[i].intensity;
 
@@ -151,18 +176,16 @@ Save_points::dynamic_or_static(int step_num,
 	size_t point_size = obstacle_cloud->points.size();
 	
 	for (size_t i = 0; i < point_size; ++i) {
-		int x = ((grid_dim_/2)+
-				(obstacle_cloud->points[i].x-buffer_transform.getOrigin().x())/m_per_cell_);
 		
-		int y = ((grid_dim_/2)+
-				(obstacle_cloud->points[i].y-buffer_transform.getOrigin().y())/m_per_cell_);
-
+		int x = ((grid_dim_/2)+(obstacle_cloud->points[i].x)/m_per_cell_);
+		
+		int y = ((grid_dim_/2)+(obstacle_cloud->points[i].y)/m_per_cell_);
+		
 		if (prob[x][y]>(step_num*static_threshold)) {//gridの中に
-				
-				
+							
 				pcl::PointXYZI temp_point;
-				temp_point.x = obstacle_cloud->points[i].x-buffer_transform.getOrigin().x(); 
-				temp_point.y = obstacle_cloud->points[i].y-buffer_transform.getOrigin().y();
+				temp_point.x = obstacle_cloud->points[i].x; 
+				temp_point.y = obstacle_cloud->points[i].y;
 				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
@@ -171,8 +194,8 @@ Save_points::dynamic_or_static(int step_num,
 	
 		else{
 				pcl::PointXYZI temp_point;
-				temp_point.x = obstacle_cloud->points[i].x-buffer_transform.getOrigin().x(); 
-				temp_point.y = obstacle_cloud->points[i].y-buffer_transform.getOrigin().y();
+				temp_point.x = obstacle_cloud->points[i].x; 
+				temp_point.y = obstacle_cloud->points[i].y;
 				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
@@ -214,10 +237,11 @@ Save_points::save_points2pcl(int step_num,
 }
 
 
-//clear
 void
-Save_points::points_clear(pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud){
-
-	save_cloud->points.clear();
+Save_points::say(){
+	
+	// cout<<"x"<<buffer_transform.getOrigin().x()<<endl;
+	// cout<<"y"<<buffer_transform.getOrigin().y()<<endl;
+	// cout<<tf::getYaw(buffer_transform.getRotation())<<endl;
 
 }
