@@ -1,5 +1,5 @@
-#ifndef _SAVE_POINTS_HPP_
-#define _SAVE_POINTS_HPP_
+#ifndef _SAVE_POINTS_MINMAX_HPP_
+#define _SAVE_POINTS_MINMAX_HPP_
 
 #include <ros/ros.h>
 #include <iostream>
@@ -25,7 +25,7 @@ using namespace std;
 
 const float height_diff_threshold_ = 0.15;
 
-class Save_points
+class Save_points_minmax
 {
 	private:
 		tf::TransformBroadcaster br;
@@ -42,13 +42,12 @@ class Save_points
 
 		int step_num;
 		int grid_dim_;
-		int grid_dim_ex_;				//prevent_segfault
 		float m_per_cell_;
 		float static_threshold;
 
 	public:
 
-	Save_points();
+	Save_points_minmax();
 
 	void say();
 
@@ -59,11 +58,11 @@ class Save_points
 	
 	void listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, string Parent_id);
 	
-	void withprob_method(sensor_msgs::PointCloud2 s_points, pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_cloud);//height_map
+	void minmax_method(sensor_msgs::PointCloud2 s_points, pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud);//height_map
 
 	void dynamic_or_static(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud);//
 	
-	void save_points2pcl(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud);
+	void save_points2pcl(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud);
 
 
 };

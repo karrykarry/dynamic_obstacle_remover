@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+	
+	<!-- <node name="save_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" output="screen" >		 -->
+	<node name="prob_points_pub" pkg="dynamic_obstacle_remover" type="probability_points_minmax" output="screen" >		
+		
+		<param name="Parent_id" value="/velodyne" />
+		<param name="Child_id" value="/odom" />
+
+		<param name="skip_time" value="5" />
+		<param name="step_num" value="10" />
+		<param name="grid_dim_" value="300" />
+		<param name="per_cell_" value="0.2" />
+		<param name="static_threshold" value="0.7" />
+	</node>
+
+</launch>
+
+

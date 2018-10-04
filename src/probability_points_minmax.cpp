@@ -3,7 +3,6 @@
  * skip_time 分の[hz]で貯めて，step分の点群を貯める
  * 障害物判定にgrid_dim_でグリッドの大きさ・per_cellで解像度を表している．
  *
- * subscribe:obstacle_points
 */ 
 #include <ros/ros.h>
 #include <iostream>
@@ -21,12 +20,13 @@
 #include <pcl/point_cloud.h>
 
 #include "tool.hpp"
-#include "save_points.hpp"
+#include "save_points_minmax.hpp"
 
 using namespace std;
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr dynamic_cloud (new pcl::PointCloud<pcl::PointXYZI>);
 pcl::PointCloud<pcl::PointXYZI>::Ptr static_cloud (new pcl::PointCloud<pcl::PointXYZI>);
+pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud (new pcl::PointCloud<pcl::PointXYZI>);
 
 class BufferTF
 {
@@ -56,7 +56,7 @@ class BufferTF
 	
 	public:
 		BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh);
-		Save_points save_points;
+		Save_points_minmax save_points;
 		void laserCallback(const sensor_msgs::PointCloud2 input);
 };
 
@@ -92,18 +92,21 @@ BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 		save_points.listen_tf(buffer_point, Child_id, Parent_id);
 	
 		if(flag) flag = save_points.first_process(step_num);//はじめの処理
-		save_points.save_points2pcl(step_num,dynamic_cloud,static_cloud);//main処理
+		save_points.save_points2pcl(step_num,dynamic_cloud,static_cloud,clear_cloud);//main処理
 
 		//pub
 		point_pub(dynamic_pub,*dynamic_cloud,"/velodyne",time_now);
 		point_pub(static_pub,*static_cloud,"/velodyne",time_now);
+		point_pub(clear_pub,*clear_cloud,"/velodyne",time_now);
 
 		dynamic_cloud->points.clear();	
 		static_cloud->points.clear();	
+		clear_cloud->points.clear();	
 		// save_points.say();
 
 		count=0;
 	}
+
 	count++;
 }
 
