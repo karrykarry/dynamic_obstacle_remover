@@ -1,8 +1,6 @@
 #include "save_points.hpp"
 #include "tool.hpp"
 
-#define MIN(x,y) ((x) < (y) ? (x) : (y)) 
-#define MAX(x,y) ((x) > (y) ? (x) : (y)) 
 
 Save_points::Save_points()
 {
@@ -67,6 +65,8 @@ Save_points::return_globalxy(double x, double y, double yaw, double& return_x, d
 	input_xy << x, y;
 
 	ans = rot*input_xy;
+	if(fabs(ans.x())<0.1) ans.x() = 0;
+	if(fabs(ans.y())<0.1) ans.y() = 0;
 
 	return_x = ans.x();
 	return_y = ans.y();
@@ -92,7 +92,6 @@ Save_points::withprob_method(
 	size_t point_size = input_cloud->points.size();
 	// build height map
 
-
 	for (size_t i = 0; i < point_size; ++i) {
 		t_x = input_cloud->points[i].x-buffer_transform.getOrigin().x();
 		t_y = input_cloud->points[i].y-buffer_transform.getOrigin().y();
@@ -102,18 +101,21 @@ Save_points::withprob_method(
 		int x = ((grid_dim_/2)+(r_x)/m_per_cell_);
 		int y = ((grid_dim_/2)+(r_y)/m_per_cell_);	
 
-		if(!prob_flag[x][y]) prob[x][y]++;
+		if (x >= 0 && x < grid_dim_ && y >= 0 && y < grid_dim_) {
 
-		prob_flag[x][y] = true;
+			if(!prob_flag[x][y]) prob[x][y]++;
 
-		pcl::PointXYZI temp_point;
-		temp_point.x = r_x; 
-		temp_point.y = r_y;	
-		temp_point.z = input_cloud->points[i].z;
-		temp_point.intensity = input_cloud->points[i].intensity;
+			prob_flag[x][y] = true;
 
-		obstacle_cloud->points.push_back(temp_point);
+			pcl::PointXYZI temp_point;
+			temp_point.x = r_x; 
+			temp_point.y = r_y;	
+			temp_point.z = input_cloud->points[i].z;
+			temp_point.intensity = input_cloud->points[i].intensity;
 
+			obstacle_cloud->points.push_back(temp_point);
+
+		}
 	}
 
 	input_cloud->points.clear();

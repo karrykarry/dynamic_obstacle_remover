@@ -35,10 +35,8 @@ class BufferTF
 		ros::Subscriber laser_sub;
 		ros::Publisher dynamic_pub;
 		ros::Publisher static_pub;
-		ros::Publisher clear_pub;
 	
 		sensor_msgs::PointCloud buffer_point;
-		sensor_msgs::PointCloud2 clear_points;
 		sensor_msgs::PointCloud2 dynamic_points;
 		sensor_msgs::PointCloud2 static_points;
 		ros::Time time_now;
@@ -69,7 +67,6 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	
 	dynamic_pub = n.advertise<sensor_msgs::PointCloud2>("dynamic_points_pub", 10);
 	static_pub = n.advertise<sensor_msgs::PointCloud2>("static_points_pub", 10);
-	clear_pub = n.advertise<sensor_msgs::PointCloud2>("clear_points_pub", 10);
 	
 	priv_nh.getParam("Parent_id", Parent_id);
 	priv_nh.getParam("Child_id", Child_id);
