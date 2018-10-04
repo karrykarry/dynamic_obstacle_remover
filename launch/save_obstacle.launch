@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 <launch>
 
-	<node name="rm_node20" pkg="velodyne_height_map" type="rm_node20" />
-
 	<node name="buffer_points" pkg="dynamic_obstacle_remover" type="buffer_points" >
 		
 		<param name="voxel_size" value="0.1" />
 		<param name="frame_name" value="/velodyne" />
-		<remap from="velodyne_points" to="rm_ground" />
+		<remap from="velodyne_points" to="velodyne_obstacles_K" />
 	</node>
 		
 		
