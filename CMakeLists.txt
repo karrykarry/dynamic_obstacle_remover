@@ -144,6 +144,7 @@ add_definitions(
 add_library(dynamic_obstacle_remover
   
 	src/dynamic_obstacle_remover/tool.cpp
+	src/dynamic_obstacle_remover/road_points.cpp
 	src/dynamic_obstacle_remover/save_points.cpp
 	src/dynamic_obstacle_remover/save_points_minmax.cpp
 )
@@ -156,6 +157,7 @@ add_executable(buffer_points src/buffer_points.cpp)
 add_executable(voxel_points src/voxel_points.cpp)
 add_executable(buffer_tf_convert src/buffer_tf_convert.cpp)
 add_executable(save_points_pub src/save_points_pub.cpp)
+add_executable(probability_road src/probability_road.cpp)
 add_executable(probability_points src/probability_points.cpp)
 add_executable(probability_points_minmax src/probability_points_minmax.cpp)
 
@@ -185,6 +187,15 @@ target_link_libraries(save_points_pub
 	${catkin_LIBRARIES}
     ${PCL_LIBRARIES}
 )
+
+
+target_link_libraries(probability_road
+	dynamic_obstacle_remover
+	${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
+
+
 
 target_link_libraries(probability_points
 	dynamic_obstacle_remover

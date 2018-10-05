@@ -1,15 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-	<node name="buffer_points" pkg="dynamic_obstacle_remover" type="buffer_points" >
-		
-		<param name="voxel_size" value="0.1" />
-		<param name="frame_name" value="/velodyne" />
-		<remap from="velodyne_points" to="velodyne_obstacles_K" />
-	</node>
-		
-		
-	<node name="prob_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" output="screen">		
+	<node name="prob_road_pub" pkg="dynamic_obstacle_remover" type="probability_road" output="screen">		
 		
 		<param name="Parent_id" value="/velodyne" />
 		<param name="Child_id" value="/odom" />
@@ -23,5 +15,6 @@
 	</node>
 
 </launch>
+
 
 
