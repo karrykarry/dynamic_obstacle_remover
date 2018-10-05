@@ -9,17 +9,19 @@ Save_points::Save_points()
 
 //paramの読み込み
 void
-Save_points::prepare(int step_n,int grid_dim,float per_cell,float s_threshold){
+Save_points::prepare(int step_n,int r_length,float per_cell,float s_threshold){
 
 	step_num = step_n;
-	grid_dim_ = grid_dim;
-	grid_dim_ex_ = grid_dim+1;
+	grid_dim_ = r_length*2/per_cell;
+	grid_dim_ex_ = grid_dim_+1;
 	m_per_cell_ = per_cell;
 	static_threshold = s_threshold;
 
 	save_point2 = vector<sensor_msgs::PointCloud2> (step_n);
 	swap_save_point2 = vector<sensor_msgs::PointCloud2> (step_n);
 	prob = vector< vector<float> >(grid_dim_ex_, vector<float>(grid_dim_ex_,0));
+
+	cout<<grid_dim_<<endl;
 }
 
 //はじめの点群を入れ込む

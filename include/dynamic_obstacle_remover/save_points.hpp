@@ -52,7 +52,7 @@ class Save_points
 
 	void say();
 
-	void prepare(int step_num,int grid_dim,float per_celli,float s_threshold);
+	void prepare(int step_num,int r_length,float per_celli,float s_threshold);
 	bool first_process(int step_num);
 
 	void return_globalxy(double x, double y, double yaw, double& return_x, double& return_y);

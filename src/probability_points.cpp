@@ -48,7 +48,7 @@ class BufferTF
 		string Child_id;
 		int skip_time;
 		int step_num;
-		int grid_dim;
+		int r_length;
 		float per_cell;
 		float static_threshold;
 	
@@ -72,11 +72,11 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	priv_nh.getParam("Child_id", Child_id);
 	priv_nh.getParam("skip_time", skip_time);
 	priv_nh.getParam("step_num", step_num);
-	priv_nh.getParam("grid_dim_", grid_dim);
+	priv_nh.getParam("radius_length", r_length);
 	priv_nh.getParam("per_cell_", per_cell);
 	priv_nh.getParam("static_threshold", static_threshold);
 
-	save_points.prepare(step_num,grid_dim,per_cell,static_threshold);
+	save_points.prepare(step_num,r_length,per_cell,static_threshold);
 }
 
 void
