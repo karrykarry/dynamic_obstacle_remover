@@ -1,25 +1,17 @@
 <?xml version="1.0"?>
 <launch>
-
-	<node name="buffer_points" pkg="dynamic_obstacle_remover" type="buffer_points" >
-		
-		<param name="voxel_size" value="0.1" />
-		<param name="frame_name" value="/velodyne" />
-		<remap from="velodyne_points" to="velodyne_obstacles_K" />
-	</node>
-		
 		
 	<node name="prob_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" output="screen">		
+		<remap from="voxel_points" to="velodyne_obstacles_K" />
+		<rosparam file="$(find intersection_intensity)/yaml/save.yaml"/>
 		
 		<param name="Parent_id" value="/velodyne" />
 		<param name="Child_id" value="/odom" />
 
 		<param name="skip_time" value="5" />
 		<param name="step_num" value="10" />
-		<rosparam file="$(find intersection_intensity)/yaml/save.yaml"/>
-		<!-- <param name="radius_length" value="20" /> -->
 		<param name="per_cell_" value="0.2" />
-		<param name="static_threshold" value="0.7" />
+		<param name="static_threshold" value="0.8" />
 	</node>
 
 </launch>

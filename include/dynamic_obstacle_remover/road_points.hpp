@@ -40,6 +40,7 @@ class Road_points
 
 		vector< vector<float> > prob;	//gridの確率
 		vector< vector<float> > grid2count;	//点群が入った数を格納
+		vector< vector<bool> > init_point;	//outputの点を抑える用
 
 		int step_num;
 		int grid_dim_;
@@ -62,9 +63,9 @@ class Road_points
 	
 	void withprob_method(sensor_msgs::PointCloud2 s_points, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud);//height_map
 
-	void road_or_notroad(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr notroad_cloud);//
+	void road_or_notroad(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud);//
 	
-	void save_points2pcl(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr notroad_cloud);
+	void save_points2pcl(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud);
 
 
 };

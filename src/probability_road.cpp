@@ -26,7 +26,6 @@
 using namespace std;
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud (new pcl::PointCloud<pcl::PointXYZI>);
-pcl::PointCloud<pcl::PointXYZI>::Ptr notroad_cloud (new pcl::PointCloud<pcl::PointXYZI>);
 
 class BufferTF
 {
@@ -34,7 +33,6 @@ class BufferTF
 		ros::Rate r;
 		ros::Subscriber laser_sub;
 		ros::Publisher road_pub;
-		ros::Publisher notroad_pub;
 	
 		sensor_msgs::PointCloud buffer_point;
 		sensor_msgs::PointCloud2 dynamic_points;
@@ -65,8 +63,7 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 {
 	laser_sub = n.subscribe("road_vis", 10, &BufferTF::laserCallback, this);
 	
-	road_pub = n.advertise<sensor_msgs::PointCloud2>("road_points_pub", 10);
-	notroad_pub = n.advertise<sensor_msgs::PointCloud2>("notroad_points_pub", 10);
+	road_pub = n.advertise<sensor_msgs::PointCloud2>("prob_road_points", 10);
 	
 	priv_nh.getParam("Parent_id", Parent_id);
 	priv_nh.getParam("Child_id", Child_id);
@@ -89,14 +86,12 @@ BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 		road_points.listen_tf(buffer_point, Child_id, Parent_id);
 	
 		if(flag) flag = road_points.first_process(step_num);//はじめの処理
-		road_points.save_points2pcl(step_num,road_cloud,notroad_cloud);//main処理
+		road_points.save_points2pcl(step_num,road_cloud);//main処理
 
 		//pub
 		point_pub(road_pub,*road_cloud,"/velodyne",time_now);
-		point_pub(notroad_pub,*notroad_cloud,"/velodyne",time_now);
 
 		road_cloud->points.clear();	
-		notroad_cloud->points.clear();	
 		// road_points.say();
 
 		count=0;

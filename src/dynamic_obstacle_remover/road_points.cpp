@@ -21,6 +21,7 @@ Road_points::prepare(int step_n,int r_length,float per_cell,float r_threshold){
 	swap_save_point2 = vector<sensor_msgs::PointCloud2> (step_n);
 	prob = vector< vector<float> >(grid_dim_ex_, vector<float>(grid_dim_ex_,0));
 	grid2count = vector< vector<float> >(grid_dim_ex_, vector<float>(grid_dim_ex_,0));
+	init_point = vector< vector<bool> >(grid_dim_ex_, vector<bool>(grid_dim_ex_,0));
 
 	cout<<grid_dim_<<endl;
 }
@@ -40,12 +41,6 @@ Road_points::listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, st
 
 	try{
 		ros::Time time_now = buffer_point.header.stamp;
-		// ros::Time past = time_now - ros::Duration(5.0);
-
-		// listener.waitForTransform(
-		// 		Child_id,time_now, 
-		// 		Parent_id,past,
-		// 		"/map",ros::Duration(1.0));
 		listener.waitForTransform(Child_id, Parent_id, time_now, ros::Duration(0.05));
 
 		listener.lookupTransform(Child_id, Parent_id,  
@@ -115,14 +110,17 @@ Road_points::withprob_method(
 				prob_flag[x][y] = true;
 			}
 
+			if(!init_point[x][y]){
 
-			pcl::PointXYZI temp_point;
-			temp_point.x = r_x; 
-			temp_point.y = r_y;	
-			temp_point.z = input_cloud->points[i].z;
-			temp_point.intensity = input_cloud->points[i].intensity;
+				pcl::PointXYZI temp_point;
+				temp_point.x = r_x; 
+				temp_point.y = r_y;	
+				temp_point.z = input_cloud->points[i].z;
+				temp_point.intensity = input_cloud->points[i].intensity;
 
-			clear_cloud->points.push_back(temp_point);
+				clear_cloud->points.push_back(temp_point);
+				init_point[x][y] = true;		
+			}
 
 		}
 	}
@@ -133,8 +131,7 @@ Road_points::withprob_method(
 void
 Road_points::road_or_notroad(int step_num,
 		pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud,
-		pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud,
-		pcl::PointCloud<pcl::PointXYZI>::Ptr notroad_cloud)
+		pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud)
 {
 
 	size_t point_size = clear_cloud->points.size();
@@ -147,36 +144,26 @@ Road_points::road_or_notroad(int step_num,
 		
 		int y = ((grid_dim_/2)+(clear_cloud->points[i].y)/m_per_cell_);
 		
-		if (prob[x][y]>(grid2count[x][y]*road_threshold)) {//gridの中に
-							
-				pcl::PointXYZI temp_point;
-				temp_point.x = clear_cloud->points[i].x; 
-				temp_point.y = clear_cloud->points[i].y;
-				temp_point.z = clear_cloud->points[i].z-buffer_transform.getOrigin().z();
-				temp_point.intensity = clear_cloud->points[i].intensity;
+		pcl::PointXYZI temp_point;
+		temp_point.x = clear_cloud->points[i].x; 
+		temp_point.y = clear_cloud->points[i].y;
+		temp_point.z = clear_cloud->points[i].z-buffer_transform.getOrigin().z();
+		
+		if (prob[x][y]>(grid2count[x][y]*road_threshold)) 
+			temp_point.intensity = 1.0;
 
-				road_cloud->points.push_back(temp_point);
-			}
-	
-		else{
-				pcl::PointXYZI temp_point;
-				temp_point.x = clear_cloud->points[i].x; 
-				temp_point.y = clear_cloud->points[i].y;
-				temp_point.z = clear_cloud->points[i].z-buffer_transform.getOrigin().z();
-				temp_point.intensity = clear_cloud->points[i].intensity;
+		else temp_point.intensity = 0.0;
+			
+		road_cloud->points.push_back(temp_point);
 
-				notroad_cloud->points.push_back(temp_point);
-		}	
-	}
-	
+	}	
 }
 
 
 //貯めてる点群をpclに変換
 void
 Road_points::save_points2pcl(int step_num,
-		pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud,
-		pcl::PointCloud<pcl::PointXYZI>::Ptr notroad_cloud)
+		pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud)
 {
 
 	pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud (new pcl::PointCloud<pcl::PointXYZI>);
@@ -188,7 +175,7 @@ Road_points::save_points2pcl(int step_num,
 		if(!(i==step_num-1)) swap_save_point2[i+1] = save_point2[i];
 	}
 	
-	road_or_notroad(step_num,clear_cloud,road_cloud,notroad_cloud);
+	road_or_notroad(step_num,clear_cloud,road_cloud);
 	clear_cloud->points.clear();
 
 	save_point2 = swap_save_point2;
@@ -197,6 +184,7 @@ Road_points::save_points2pcl(int step_num,
 		for(int j=0;j<grid_dim_;j++){
 			prob[i][j] = 0;
 			grid2count[i][j] = 0;
+			init_point[i][j] = 0;
 		}
 	}
 

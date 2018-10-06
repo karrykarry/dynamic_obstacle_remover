@@ -37,17 +37,14 @@ void
 Save_points_minmax::listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, string Parent_id){
 
 	try{
-		ros::Time time_now = buffer_point.header.stamp;
-		ros::Time past = time_now - ros::Duration(5.0);
-
-		listener.waitForTransform(
-				Child_id,time_now, 
-				Parent_id,past,
-				"/map",ros::Duration(3.0));
+		ros::Time time_now = buffer_point.header.stamp;	
+		listener.waitForTransform(Child_id, Parent_id, time_now, ros::Duration(0.05));
+		
 		listener.lookupTransform(Child_id, Parent_id,  
 				time_now, buffer_transform);
 		listener.transformPointCloud(Child_id, time_now, buffer_point, Parent_id, save_point);
 		sensor_msgs::convertPointCloudToPointCloud2(save_point, save_point2[0]);
+	
 	}
 	catch (tf::TransformException ex){
 		ROS_ERROR("%s",ex.what());
