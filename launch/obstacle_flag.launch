@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+		
+	<node name="prob_obstacle_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" >		
+		<remap from="voxel_points" to="velodyne_obstacles_K" />
+		<rosparam file="$(find intersection_intensity)/yaml/save.yaml"/>
+		
+		<param name="lidar_id" value="/velodyne" />
+		<param name="world_id" value="/odom" />
+
+		<param name="skip_time" value="5" />
+		<param name="step_num" value="10" />
+		<param name="per_cell_" value="0.2" />
+		<param name="static_threshold" value="0.8" />
+	</node>
+
+
+	<node name="obstacle_flag" pkg="intersection_intensity" type="obstacle_flag" >
+		
+		<rosparam file="$(find intersection_intensity)/yaml/save.yaml"/>	
+		<remap from="velodyne_obstacles" to="/static_points_pub"/>
+	</node>
+
+</launch>
+
+

@@ -2,6 +2,7 @@
  *
  * skip_time 分の[hz]で貯めて，step分の点群を貯める
  * 障害物判定にgrid_dim_でグリッドの大きさ・per_cellで解像度を表している．
+ * 静的である確率が static_threshold 以上 である点をpub
  *
  * subscribe:obstacle_points
 */ 
@@ -68,8 +69,8 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	dynamic_pub = n.advertise<sensor_msgs::PointCloud2>("dynamic_points_pub", 10);
 	static_pub = n.advertise<sensor_msgs::PointCloud2>("static_points_pub", 10);
 	
-	priv_nh.getParam("Parent_id", Parent_id);
-	priv_nh.getParam("Child_id", Child_id);
+	priv_nh.getParam("lidar_id", Parent_id);
+	priv_nh.getParam("world_id", Child_id);
 	priv_nh.getParam("skip_time", skip_time);
 	priv_nh.getParam("step_num", step_num);
 	priv_nh.getParam("radius_length", r_length);

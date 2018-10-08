@@ -21,7 +21,7 @@ Save_points::prepare(int step_n,int r_length,float per_cell,float s_threshold){
 	swap_save_point2 = vector<sensor_msgs::PointCloud2> (step_n);
 	prob = vector< vector<float> >(grid_dim_ex_, vector<float>(grid_dim_ex_,0));
 
-	cout<<grid_dim_<<endl;
+	cout<<"gridの個数："<<grid_dim_<<endl;
 }
 
 //はじめの点群を入れ込む
@@ -89,7 +89,7 @@ Save_points::withprob_method(
 	pcl::fromROSMsg(s_points, *input_cloud);   
 	size_t point_size = input_cloud->points.size();
 	// build height map
-	cout<<point_size<<endl;
+	// cout<<point_size<<endl;
 
 	for (size_t i = 0; i < point_size; ++i) {
 		t_x = input_cloud->points[i].x-buffer_transform.getOrigin().x();
@@ -143,7 +143,8 @@ Save_points::dynamic_or_static(int step_num,
 				pcl::PointXYZI temp_point;
 				temp_point.x = obstacle_cloud->points[i].x; 
 				temp_point.y = obstacle_cloud->points[i].y;
-				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
+				// temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
+				temp_point.z = obstacle_cloud->points[i].z-1.3;
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
 				static_cloud->points.push_back(temp_point);
@@ -153,7 +154,8 @@ Save_points::dynamic_or_static(int step_num,
 				pcl::PointXYZI temp_point;
 				temp_point.x = obstacle_cloud->points[i].x; 
 				temp_point.y = obstacle_cloud->points[i].y;
-				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
+				// temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
+				temp_point.z = obstacle_cloud->points[i].z;
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
 				dynamic_cloud->points.push_back(temp_point);

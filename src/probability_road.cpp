@@ -1,9 +1,8 @@
-/* probability_points.cpp:動的の点・静的の点・地面を抽出
+/* probability_road.cpp:動的の点・静的の点・地面を抽出
  *
- * skip_time 分の[hz]で貯めて，step分の点群を貯める
- * 障害物判定にgrid_dim_でグリッドの大きさ・per_cellで解像度を表している．
+ * 走行可能かどうかをためて、確率で閾値以上の点をpubするだけ
  *
- * subscribe:obstacle_points
+ * subscribe:drivable_point
 */ 
 #include <ros/ros.h>
 #include <iostream>
@@ -61,12 +60,12 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	count(0),
 	flag(true)
 {
-	laser_sub = n.subscribe("road_vis", 10, &BufferTF::laserCallback, this);
+	laser_sub = n.subscribe("drivable_point", 10, &BufferTF::laserCallback, this);
 	
 	road_pub = n.advertise<sensor_msgs::PointCloud2>("prob_road_points", 10);
 	
-	priv_nh.getParam("Parent_id", Parent_id);
-	priv_nh.getParam("Child_id", Child_id);
+	priv_nh.getParam("lidar_id", Parent_id);
+	priv_nh.getParam("world_id", Child_id);
 	priv_nh.getParam("skip_time", skip_time);
 	priv_nh.getParam("step_num", step_num);
 	priv_nh.getParam("radius_length", r_length);
