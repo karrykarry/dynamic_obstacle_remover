@@ -41,7 +41,7 @@ Road_points::listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, st
 
 	try{
 		ros::Time time_now = buffer_point.header.stamp;
-		listener.waitForTransform(Child_id, Parent_id, time_now, ros::Duration(0.05));
+		listener.waitForTransform(Child_id, Parent_id, time_now, ros::Duration(0.5));
 
 		listener.lookupTransform(Child_id, Parent_id,  
 		 		time_now, buffer_transform);

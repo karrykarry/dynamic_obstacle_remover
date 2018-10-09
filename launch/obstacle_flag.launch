@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 		
-	<node name="prob_obstacle_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" >		
+	<node name="prob_obstacle_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" output="screen">		
 		<remap from="voxel_points" to="velodyne_obstacles_K" />
 		<rosparam file="$(find intersection_intensity)/yaml/save.yaml"/>
 		

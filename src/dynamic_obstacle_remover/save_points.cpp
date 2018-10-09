@@ -39,7 +39,7 @@ Save_points::listen_tf(sensor_msgs::PointCloud buffer_point, string Child_id, st
 
 	try{
 		ros::Time time_now = buffer_point.header.stamp;
-		listener.waitForTransform(Child_id, Parent_id, time_now, ros::Duration(0.05));
+		listener.waitForTransform(Child_id, Parent_id, time_now, ros::Duration(0.5));
 		
 		listener.lookupTransform(Child_id, Parent_id,  
 				time_now, buffer_transform);
@@ -143,8 +143,7 @@ Save_points::dynamic_or_static(int step_num,
 				pcl::PointXYZI temp_point;
 				temp_point.x = obstacle_cloud->points[i].x; 
 				temp_point.y = obstacle_cloud->points[i].y;
-				// temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
-				temp_point.z = obstacle_cloud->points[i].z-1.3;
+				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
 				static_cloud->points.push_back(temp_point);
@@ -154,15 +153,17 @@ Save_points::dynamic_or_static(int step_num,
 				pcl::PointXYZI temp_point;
 				temp_point.x = obstacle_cloud->points[i].x; 
 				temp_point.y = obstacle_cloud->points[i].y;
-				// temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
-				temp_point.z = obstacle_cloud->points[i].z;
+				temp_point.z = obstacle_cloud->points[i].z-buffer_transform.getOrigin().z();
 				temp_point.intensity = obstacle_cloud->points[i].intensity;
 
 				dynamic_cloud->points.push_back(temp_point);
 		}
 		}
 	}
-	
+
+		// cout<<buffer_transform.getOrigin().z()<<endl;
+
+
 }
 
 
