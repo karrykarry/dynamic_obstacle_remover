@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <string.h>
+#include <std_msgs/Float32.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
@@ -65,7 +66,7 @@ class Road_points
 
 	void road_or_notroad(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr clear_cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud);//
 	
-	void save_points2pcl(int step_num, pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud);
+	void save_points2pcl(int step_num, std_msgs::Float32& world2lidar, pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud);
 
 
 };

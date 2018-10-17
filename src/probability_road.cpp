@@ -6,6 +6,7 @@
 */ 
 #include <ros/ros.h>
 #include <iostream>
+#include <std_msgs/Float32.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -32,7 +33,9 @@ class BufferTF
 		ros::Rate r;
 		ros::Subscriber laser_sub;
 		ros::Publisher road_pub;
+		ros::Publisher my_pose_pub;
 	
+		std_msgs::Float32 world2lidar;
 		sensor_msgs::PointCloud buffer_point;
 		sensor_msgs::PointCloud2 dynamic_points;
 		sensor_msgs::PointCloud2 static_points;
@@ -63,6 +66,7 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	laser_sub = n.subscribe("drivable_point", 10, &BufferTF::laserCallback, this);
 	
 	road_pub = n.advertise<sensor_msgs::PointCloud2>("prob_road_points", 10);
+	my_pose_pub = n.advertise<std_msgs::Float32>("my_pose", 10);
 	
 	priv_nh.getParam("lidar_id", Parent_id);
 	priv_nh.getParam("world_id", Child_id);
@@ -85,11 +89,12 @@ BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 		road_points.listen_tf(buffer_point, Child_id, Parent_id);
 	
 		if(flag) flag = road_points.first_process(step_num);//はじめの処理
-		road_points.save_points2pcl(step_num,road_cloud);//main処理
+		road_points.save_points2pcl(step_num,world2lidar,road_cloud);//main処理
 
 		//pub
 		point_pub(road_pub,*road_cloud,"/velodyne",time_now);
-
+		
+		my_pose_pub.publish(world2lidar);	
 		road_cloud->points.clear();	
 		// road_points.say();
 

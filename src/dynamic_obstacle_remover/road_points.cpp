@@ -163,6 +163,7 @@ Road_points::road_or_notroad(int step_num,
 //貯めてる点群をpclに変換
 void
 Road_points::save_points2pcl(int step_num,
+		std_msgs::Float32& world2lidar,
 		pcl::PointCloud<pcl::PointXYZI>::Ptr road_cloud)
 {
 
@@ -174,6 +175,7 @@ Road_points::save_points2pcl(int step_num,
 
 		if(!(i==step_num-1)) swap_save_point2[i+1] = save_point2[i];
 	}
+	world2lidar.data = tf::getYaw(buffer_transform.getRotation());
 	
 	road_or_notroad(step_num,clear_cloud,road_cloud);
 	clear_cloud->points.clear();
