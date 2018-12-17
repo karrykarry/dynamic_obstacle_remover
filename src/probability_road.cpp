@@ -1,5 +1,10 @@
 /* probability_road.cpp:動的の点・静的の点・地面を抽出
  *
+ *2018.10.20
+ *
+ * author : R.Kusakari
+ *
+ *
  * 走行可能かどうかをためて、確率で閾値以上の点をpubするだけ
  *
  * subscribe:drivable_point

@@ -85,6 +85,16 @@ class Buffer
 					buffer2point();
 					// change_point(buffer_points[0],buffer_pub1);             
 					// change_point(buffer_points[1],buffer_pub2);             
+					// change_point(buffer_points[2],buffer_pub3);             
+					// change_point(buffer_points[3],buffer_pub4);             
+					// change_point(buffer_points[4],buffer_pub5);             
+				
+					change_point(buffer_points[0],buffer_pub1,"/velodyne");             
+					change_point(buffer_points[1],buffer_pub2,"/velodyne");             
+					change_point(buffer_points[2],buffer_pub3,"/velodyne");             
+					change_point(buffer_points[3],buffer_pub4,"/velodyne");             
+					change_point(buffer_points[4],buffer_pub5,"/velodyne");             
+					
 					// change_point(buffer_points[0],buffer_pub1,"/save_velodyne");             
 					// change_point(buffer_points[0],buffer_pub2,"/velodyne");             
 					// change_point(buffer_points[4],buffer_pub3,"/save_velodyne");             
@@ -96,11 +106,9 @@ class Buffer
 					// change_point(buffer_points[4],buffer_pub4,"/velodyne");             
 					
 					// change_point(buffer_points[0],buffer_pub5,"/velodyne");             
-					change_point(buffer_points[0],buffer_pub5,frame_name);             
+					// change_point(buffer_points[0],buffer_pub5,frame_name);             
 					// change_point(buffer_points[0],buffer_pub5,"/odom");             
 					
-					// change_point(buffer_points[3],buffer_pub4);             
-					// change_point(buffer_points[4],buffer_pub5);             
 				}
 
 				ros::spinOnce();
@@ -118,16 +126,16 @@ Buffer::Buffer(ros::NodeHandle n, ros::NodeHandle priv_nh):
 {
 	laser_sub = n.subscribe("velodyne_points", 10, &Buffer::laserCallback, this);
 	
-	// buffer_pub1 = n.advertise<sensor_msgs::PointCloud2>("buffer1", 10);
-	// buffer_pub2 = n.advertise<sensor_msgs::PointCloud2>("buffer2", 10);
-	// buffer_pub3 = n.advertise<sensor_msgs::PointCloud2>("buffer3", 10);
-	// buffer_pub4 = n.advertise<sensor_msgs::PointCloud2>("buffer4", 10);
+	buffer_pub1 = n.advertise<sensor_msgs::PointCloud2>("buffer1", 10);
+	buffer_pub2 = n.advertise<sensor_msgs::PointCloud2>("buffer2", 10);
+	buffer_pub3 = n.advertise<sensor_msgs::PointCloud2>("buffer3", 10);
+	buffer_pub4 = n.advertise<sensor_msgs::PointCloud2>("buffer4", 10);
+	buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("buffer5", 10);
 	// buffer_pub1 = n.advertise<sensor_msgs::PointCloud2>("save_velodyne_1", 10);
 	// buffer_pub2 = n.advertise<sensor_msgs::PointCloud2>("velodyne_1", 10);
 	// buffer_pub3 = n.advertise<sensor_msgs::PointCloud2>("save_velodyne_4", 10);
 	// buffer_pub4 = n.advertise<sensor_msgs::PointCloud2>("velodyne_4", 10);
-	// buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("buffer5", 10);
-	buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("voxel_points", 10);
+	// buffer_pub5 = n.advertise<sensor_msgs::PointCloud2>("voxel_points", 10);
 
 	priv_nh.getParam("voxel_size", voxel_size);
 	priv_nh.getParam("frame_name", frame_name);

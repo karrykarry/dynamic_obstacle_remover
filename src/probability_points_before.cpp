@@ -15,7 +15,6 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <std_msgs/Bool.h>
 
 #include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/voxel_grid.h>
@@ -39,7 +38,6 @@ class BufferTF
 	private:
 		ros::Rate r;
 		ros::Subscriber laser_sub;
-		ros::Subscriber flag_sub;
 		ros::Publisher dynamic_pub;
 		ros::Publisher static_pub;
 	
@@ -50,7 +48,6 @@ class BufferTF
 			
 		int count;
 		bool flag;
-		bool toyota_flag;
 		//param
 		string Parent_id;
 		string Child_id;
@@ -59,21 +56,19 @@ class BufferTF
 		int r_length;
 		float per_cell;
 		float static_threshold;
-		
-		size_t velodyne_size_b;
-
+	
 	public:
 		BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh);
 		Save_points save_points;
 		void laserCallback(const sensor_msgs::PointCloud2 input);
-		void sceneCallback(const std_msgs::BoolConstPtr msg);
 };
 
 BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
-	r(20),count(0),flag(true),toyota_flag(false)
+	r(20),
+	count(0),
+	flag(true)
 {
 	laser_sub = n.subscribe("voxel_points", 10, &BufferTF::laserCallback, this);
-	flag_sub = n.subscribe("scene_flag", 10, &BufferTF::sceneCallback, this);
 	
 	dynamic_pub = n.advertise<sensor_msgs::PointCloud2>("dynamic_points_pub", 10);
 	static_pub = n.advertise<sensor_msgs::PointCloud2>("static_points_pub", 10);
@@ -90,15 +85,6 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 }
 
 void
-BufferTF::sceneCallback(const std_msgs::BoolConstPtr msg){
-	// toyota_flag = msg->data;
-
-
-}
-
-
-
-void
 BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 
 	if(count%skip_time==0){
@@ -110,20 +96,9 @@ BufferTF::laserCallback(const sensor_msgs::PointCloud2 input){
 		if(flag) flag = save_points.first_process(step_num);//はじめの処理
 		save_points.save_points2pcl(step_num,dynamic_cloud,static_cloud);//main処理
 
-    	size_t velodyne_size = dynamic_cloud->points.size();
-	
-
-		if(velodyne_size < velodyne_size_b *3 ){
-	if(toyota_flag){
-
 		//pub
 		point_pub(dynamic_pub,*dynamic_cloud,"/velodyne",time_now);
-		point_pub(static_pub,*static_cloud,"/one_scan_velodyne",time_now);
-	}
-	else toyota_flag = true;
-		}
-		else toyota_flag = false;;
-		velodyne_size_b = velodyne_size;
+		point_pub(static_pub,*static_cloud,"/velodyne",time_now);
 
 		dynamic_cloud->points.clear();	
 		static_cloud->points.clear();	

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch>
+
+	<node name="cartesian_polar" pkg="velodyne_height_map" type="heightmap_node_cartesian_polar" >
+		<rosparam file="$(find intersection_intensity)/yaml/detect_static.yaml"/>
+		<param name="height_threshold" value="0.15"/>
+		<param name="cartesian_cell_size" value="0.2"/>
+		<param name="full_clouds" value="false"/>
+		<param name="min_threshold" value="-1.0"/>
+
+		<remap from="velodyne_obstacles" to="velodyne_obstacles_K"/>
+		<remap from="velodyne_clear" to="velodyne_clear_K"/>
+	</node>
+
+
+	<node name="point4local" pkg="dynamic_obstacle_remover" type="probability_points4local" output="screen">		
+		<remap from="voxel_points" to="velodyne_obstacles_K" />
+		<rosparam file="$(find intersection_intensity)/yaml/detect_static.yaml"/>
+		
+		<param name="lidar_id" value="/velodyne" />
+		<param name="world_id" value="/odom" />
+
+		<param name="skip_time" value="10" />
+		<param name="step_num" value="10" />
+		<param name="per_cell_" value="0.2" />
+		<param name="static_threshold" value="0.7" />
+	</node>
+
+</launch>
+
+
+

@@ -3,13 +3,14 @@
 		
 	<node name="prob_obstacle_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" output="screen">		
 		<remap from="voxel_points" to="velodyne_obstacles_K" />
+		<!-- <remap from="voxel_points" to="/rm_cluster/removed_points" /> -->
 		<rosparam file="$(find intersection_intensity)/yaml/save.yaml"/>
 		
 		<param name="lidar_id" value="/velodyne" />
 		<param name="world_id" value="/odom" />
 
-		<param name="skip_time" value="5" />
-		<param name="step_num" value="10" />
+		<param name="skip_time" value="10" />
+		<param name="step_num" value="5" />
 		<param name="per_cell_" value="0.2" />
 		<param name="static_threshold" value="0.7" />
 	</node>

@@ -1,6 +1,10 @@
 /* probability_points.cpp:動的の点・静的の点・地面を抽出
  *
- * skip_time 分の[hz]で貯めて，step分の点群を貯める
+ * 2018.10.20
+ *
+ * author : R.Kusakari
+ *
+ *skip_time 分の[hz]で貯めて，step分の点群を貯める
  * 障害物判定にgrid_dim_でグリッドの大きさ・per_cellで解像度を表している．
  *
 */ 
@@ -65,7 +69,8 @@ BufferTF::BufferTF(ros::NodeHandle n, ros::NodeHandle priv_nh):
 	count(0),
 	flag(true)
 {
-	laser_sub = n.subscribe("voxel_points", 10, &BufferTF::laserCallback, this);
+	// laser_sub = n.subscribe("voxel_points", 10, &BufferTF::laserCallback, this);
+	laser_sub = n.subscribe("velodyne_points", 10, &BufferTF::laserCallback, this);
 	
 	dynamic_pub = n.advertise<sensor_msgs::PointCloud2>("dynamic_points_pub", 10);
 	static_pub = n.advertise<sensor_msgs::PointCloud2>("static_points_pub", 10);

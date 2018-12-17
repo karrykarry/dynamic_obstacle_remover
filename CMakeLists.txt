@@ -156,6 +156,9 @@ add_executable(save_points_pub src/save_points_pub.cpp)
 add_executable(probability_road src/probability_road.cpp src/dynamic_obstacle_remover/road_points.cpp)
 add_executable(probability_points src/probability_points.cpp src/dynamic_obstacle_remover/save_points.cpp )
 add_executable(probability_points_minmax src/probability_points_minmax.cpp src/dynamic_obstacle_remover/save_points_minmax.cpp)
+add_executable(probability_points4local src/probability_points4local.cpp src/dynamic_obstacle_remover/save_points4local.cpp)
+
+
 
 target_link_libraries(buffer_points
 	dynamic_obstacle_remover
@@ -205,6 +208,15 @@ target_link_libraries(probability_points_minmax
 	${catkin_LIBRARIES}
     ${PCL_LIBRARIES}
 )
+
+
+target_link_libraries(probability_points4local
+	dynamic_obstacle_remover
+	${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
+
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure

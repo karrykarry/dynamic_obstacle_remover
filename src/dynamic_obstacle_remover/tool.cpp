@@ -25,6 +25,17 @@ float distance(float x,float y){
 // 	return_y = ans.y();
 // }
 
+void xy2rtheta(double x,double y, double &r_, double &theta_){
+
+	r_ = sqrt(x*x +y*y);
+
+	theta_ = std::atan2(y,x) + 2*M_PI;
+
+	if(theta_ > 2*M_PI) theta_ -= 2*M_PI;
+	theta_ = theta_/M_PI*180;
+
+}
+
 
 
 void voxel_grid(float size,pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,pcl::PointCloud<pcl::PointXYZI>::Ptr &filtered_cloud){

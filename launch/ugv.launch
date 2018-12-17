@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<launch>
+
+
+	<node name="prob_obstacle_points_pub" pkg="dynamic_obstacle_remover" type="probability_points" output="screen" >		
+		<remap from="voxel_points" to="velodyne_obstacles" />
+		<!-- <remap from="voxel_points" to="/rm_cluster/removed_points" /> -->
+		<rosparam file="$(find intersection_intensity)/yaml/ugv.yaml"/>
+
+		<param name="lidar_id" value="/velodyne" />
+		<param name="world_id" value="/map" />
+
+		<param name="skip_time" value="1" />
+		<param name="step_num" value="7" />
+		<param name="per_cell_" value="1.5" />
+		<param name="static_threshold" value="0.3" />
+	</node>
+
+	<node name="obstacle_flag" pkg="intersection_intensity" type="obstacle_flag" >
+		
+		<rosparam file="$(find intersection_intensity)/yaml/ugv.yaml"/>	
+		<!-- <remap from="velodyne_obstacles" to="/velodyne_obstacles_K"/> -->
+		<!-- <remap from="velodyne_obstacles" to="/velodyne_obstacles_K"/> -->
+		<!-- <remap from="velodyne_obstacles" to="/velodyne_clear"/> -->
+	</node>
+	
+
+	<node name="obstacle_path_vis" pkg="intersection_intensity" type="obstacle_path_vis"   >
+		<rosparam file="$(find intersection_intensity)/yaml/ugv.yaml"/>	
+		<param name="color" value="green" />
+		<param name="threshold_length" value="10" />
+	</node>
+
+
+</launch>
+
+

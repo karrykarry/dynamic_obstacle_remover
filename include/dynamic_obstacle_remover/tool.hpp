@@ -21,6 +21,7 @@
 float distance(float x,float y);
 
 // void return_globalxy(double x, double y, double yaw, double& return_x, double& return_y);
+void xy2rtheta(double x,double y, double &r_, double &theta_);
 
 void voxel_grid(float size,pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,pcl::PointCloud<pcl::PointXYZI>::Ptr &filtered_cloud);
 
